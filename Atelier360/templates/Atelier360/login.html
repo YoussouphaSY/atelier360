@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'css/login.css' %}">
+        <title>Atelier 360 - Connexion </title>
+    </head>
+    <body>
+
+        <div class="container">
+            
+            <div class="image-container">
+                <img src="{% static 'images/logoisep.png' %}" class="logo-isep" alt="logo isep" width="250">
+            </div>
+
+            <h1>Connexion</h1>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Nom d’utilisateur :</label>
+                    {{ form.username }}
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe :</label>
+                    {{ form.password }}
+                </div>
+                <input type="submit" value="Se connecter">
+            </form>
+
+        </div>
+
+    </body>
+    
+</html>

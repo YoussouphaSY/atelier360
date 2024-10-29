@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 # Modèles Utilisateurs
 
@@ -11,7 +11,9 @@ class Utilisateur(AbstractUser):
         ('formateur', 'Formateur'),
         ('gestionnaire', 'Gestionnaire'),
     ]
-    role = models.CharField(max_length=20, choices=ROLES)
+    role = models.CharField(max_length=20, choices=ROLES, default='formateur')
+    groups = models.ManyToManyField(Group, related_name="utilisateur_groups")
+    user_permissions = models.ManyToManyField(Permission, related_name="utilisateur_permissions")
 
     def __str__(self):
         return f"{self.username} - {self.get_role_display()}"
@@ -72,6 +74,7 @@ class Planning(models.Model):
 class Activite(models.Model):
     nom = models.CharField(max_length=100)
     description = models.TextField()
+    date = models.DateField()
 
     def __str__(self):
         return self.nom

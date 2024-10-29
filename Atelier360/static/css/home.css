@@ -1,0 +1,223 @@
+/* Global */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #513214;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 20px; /* Réduisez le padding si besoin */
+  background-color: white;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+header nav {
+  display: flex;
+  flex-wrap: wrap; /* Permet au contenu de se placer sur plusieurs lignes si nécessaire */
+}
+
+header nav a {
+  color: black;
+  text-decoration: none;
+  margin-left: 15px;
+  font-weight: bold;
+  font-size: 0.9em; /* Ajustez la taille pour les écrans plus petits */
+}
+
+/* Body container */
+.container-body {
+  position: relative;
+  background-image: url("../images/hero-isep.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: white;
+  padding: 150px 50px;
+}
+
+.container-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(45, 25, 2, 0.6);
+  z-index: -1;
+}
+
+/* Main container */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  color: white;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Titles */
+.welcome-title {
+  text-align: center;
+  font-size: 2em;
+  margin: 20px 0;
+  color: white;
+  text-shadow: 1px 1px #513214;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  color: white;
+  text-shadow: 1px 1px #513214;
+}
+
+.container h2 {
+  color: #333;
+  text-align: center;
+}
+
+/* Form and List Containers */
+.container-list,
+.container-form {
+  border: 1px solid #513214;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 15px;
+  color: white;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"],
+select {
+  width: 100%;
+  max-width: 600px;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+/* Button styling */
+.button {
+  width: 100%;
+  max-width: 200px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.button:hover {
+  background-color: #45a049;
+}
+
+/* Equipment List */
+.equipment-list {
+  color: white;
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  align-items: center;
+}
+
+nav a {
+  color: black;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: bold;
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  padding: 20px 0;
+  font-size: 0.9em;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+}
+
+.footer-links,
+.footer-contact,
+.footer-social {
+  margin: 10px 0;
+}
+
+.footer-links a,
+.footer-contact p {
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.footer-social a {
+  margin: 0 5px;
+  display: inline-block;
+}
+
+.footer-social img {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
