@@ -2,118 +2,116 @@
 {% load static %}
 <html lang="fr">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atelier 360 - Réservation</title>
-  <link rel="stylesheet" href="{% static 'css/home.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atelier 360 - Réservation</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  </head>
 
-<body>
-  <header>
-    <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150"/>
-    <nav>
-      <a href="#reservation">Réservation</a>
-      <a href="#services">Services</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+  <body>
+    <header>
+      <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150"/>
+      <nav>
+        <a href="#">Acceuil</a>
+        <a href="#">Réservation</a>
+        <a href="#">Planning </a>
+        <a href="#">Équipements</a>
+        <a href="#">Contact</a>
+        <a href="#"><img src="{% static 'images/profil.png' %}" class="profil" alt="profil" width="30"/></a>
+      </nav>
+    </header>
 
-  <div class="container-body">
-    <div class="welcome-title">Bienvenue sur Atelier 360</div>
-    <div class="subtitle">
-      Sur cette page, vous pouvez directement réserver les équipements nécessaires pour vos travaux pratiques en quelques clics.
-      <br /><br />
-      Remplissez le formulaire ci-dessous pour planifier l'utilisation des outils disponibles dans l'atelier.
-    </div>
+    <div class="container-body">
+      <div class="welcome-title">Bienvenue sur Atelier 360</div>
+      <div class="subtitle">
+        Sur cette page, vous pouvez directement réserver les équipements nécessaires pour vos travaux pratiques en quelques clics.
+        <br /><br />
+        Remplissez le formulaire ci-dessous pour planifier l'utilisation des outils disponibles dans l'atelier.
+      </div>
 
-    <div class="container">
-      <h2>Formulaire de Réservation</h2>
-      <div class="block-container">
-        <div class="container-form">
-          <form>
-            {% csrf_token %}
-            <div style="display: flex; gap: 15px;">
-              <div class="form-group">
-                <label for="equipment">Équipement à réserver :</label>
-                <select id="equipment" name="equipment" required>
-                  <option value="">Sélectionnez un équipement</option>
-                  <option value="outil1">Outil 1</option>
-                  <option value="outil2">Outil 2</option>
-                  <option value="outil3">Outil 3</option>
-                </select>
+      <div class="container">
+        <h2>Formulaire de Réservation</h2>
+        <div class="block-container">
+          <div class="container-form">
+            <form>
+              {% csrf_token %}
+              <div style="display: flex; gap: 15px;">
+                <div class="form-group">
+                  <label for="equipment">Équipement à réserver :</label>
+                  <select id="equipment" name="equipment" required>
+                    <option value="">Sélectionnez un équipement</option>
+                    <option value="outil1">Outil 1</option>
+                    <option value="outil2">Outil 2</option>
+                    <option value="outil3">Outil 3</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="time">Heure de réservation :</label>
+                  <input type="time" id="time" name="time" required />
+                </div>
               </div>
-              <div class="form-group">
-                <label for="time">Heure de réservation :</label>
-                <input type="time" id="time" name="time" required />
+              <div style="display: flex; gap: 70px;">
+                <div class="form-group">
+                  <label for="date">Date de réservation :</label>
+                  <input type="date" id="date" name="date" required />
+                </div>
+                <div class="form-group">
+                  <label for="reason">Motif de la réservation :</label>
+                  <input type="text" id="reason" name="reason" placeholder="Entrez votre motif" required />
+                </div>
               </div>
+              <div class="button">
+                <button type="submit" class="btn-text">Réserver</button>
+              </div>
+            </form>
+          </div>
+          <div class="container-list">
+            <div class="equipment-list">
+              <h3>Liste des Équipements Réservés</h3>
+              <hr />
+              <table>
+                <thead>
+                  <tr>
+                    <th>Équipement</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Outil 1</td>
+                    <td>2024-10-28</td>
+                    <td>10:00</td>
+                  </tr>
+                  <tr>
+                    <td>Outil 2</td>
+                    <td>2024-10-29</td>
+                    <td>14:00</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div style="display: flex; gap: 70px;">
-              <div class="form-group">
-                <label for="date">Date de réservation :</label>
-                <input type="date" id="date" name="date" required />
-              </div>
-              <div class="form-group">
-                <label for="reason">Motif de la réservation :</label>
-                <input type="text" id="reason" name="reason" placeholder="Entrez votre motif" required />
-              </div>
-            </div>
-            <div class="button">
-              <button type="submit" class="btn-text">Réserver</button>
-            </div>
-          </form>
-        </div>
-        <div class="container-list">
-          <div class="equipment-list">
-            <h3>Liste des Équipements Réservés</h3>
-            <hr />
-            <table>
-              <thead>
-                <tr>
-                  <th>Équipement</th>
-                  <th>Date</th>
-                  <th>Heure</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Outil 1</td>
-                  <td>2024-10-28</td>
-                  <td>10:00</td>
-                </tr>
-                <tr>
-                  <td>Outil 2</td>
-                  <td>2024-10-29</td>
-                  <td>14:00</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <footer>
-    <div class="footer-container">
-      <div class="footer-links">
-        <a href="#">Accueil</a>
-        <a href="#">À propos</a>
-        <a href="#">Services</a>
-        <a href="#">Contact</a>
+    <footer>
+      <div class="footer-container">
+        <div class="footer-links">
+          <a href="#">Accueil</a>
+          <a href="#">À propos</a>
+          <a href="#">Services</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-contact">
+          <p>&copy; 2024 Votre Site</p>
+          <p>Email : contact@votresite.com</p>
+        </div>
       </div>
-      <div class="footer-contact">
-        <p>&copy; 2024 Votre Site</p>
-        <p>Email : contact@votresite.com</p>
-      </div>
-      <div class="footer-social">
-        <a href="#" aria-label="Facebook"><img src="icons/facebook-icon.png" alt="Facebook"></a>
-        <a href="#" aria-label="Twitter"><img src="icons/twitter-icon.png" alt="Twitter"></a>
-        <a href="#" aria-label="Instagram"><img src="icons/instagram-icon.png" alt="Instagram"></a>
-      </div>
-    </div>
-  </footer>
-  
-</body>
+    </footer>
+    
+  </body>
 
 </html>
