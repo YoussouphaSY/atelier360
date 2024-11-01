@@ -1,9 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
-# Modèles Utilisateurs
 
-
+# Modèle Utilisateur avec les rôles définis
 class Utilisateur(AbstractUser):
     ROLES = [
         ('admin', 'Administrateur'),
@@ -11,7 +10,16 @@ class Utilisateur(AbstractUser):
         ('formateur', 'Formateur'),
         ('gestionnaire', 'Gestionnaire'),
     ]
-    role = models.CharField(max_length=20, choices=ROLES, default='formateur')
+
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    prenom = models.CharField(max_length=255)
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True)
+    matricule = models.CharField(max_length=50, unique=True)
+    role = models.CharField(max_length=20, choices=ROLES)
+    is_active = models.BooleanField(default=True)
+
     groups = models.ManyToManyField(Group, related_name="utilisateur_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="utilisateur_permissions")
 
@@ -19,122 +27,157 @@ class Utilisateur(AbstractUser):
         return f"{self.username} - {self.get_role_display()}"
 
 
-class Formateur(Utilisateur):
-    pass
+# Modèle Formateur
+class Formateur(models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)
+    specialisation = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Formateur: {self.utilisateur.nom}"
 
 
-class ResponsableMetier(Utilisateur):
-    specialite = models.CharField(max_length=100)
+# Modèle Responsable Métier
+class ResponsableMetier(models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)
+    dateDebut = models.DateField()
+    dateFin = models.DateField()
+
+    def __str__(self):
+        return f"Responsable Métier: {self.utilisateur.nom}"
 
 
-class Gestionnaire(Utilisateur):
-    pass
+# Modèle Chef de Département
+class ChefDepartement(models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)
+    dateDebut = models.DateField()
+    dateFin = models.DateField()
+
+    def __str__(self):
+        return f"Chef de Département: {self.utilisateur.nom}"
 
 
-# Catégorie et Équipement
-class Categorie(models.Model):
-    nom = models.CharField(max_length=100)
+# Modèle Département
+class Departement(models.Model):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    chef = models.OneToOneField(ChefDepartement, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.nom
 
 
-class Equipement(models.Model):
-    nom = models.CharField(max_length=100)
-    categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    etat = models.CharField(max_length=50, choices=[('fonctionnel', 'Fonctionnel'), ('reparation', 'En réparation'), ('hors_service', 'Hors service')])
+# Modèle Métier
+class Metier(models.Model):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    formateurs = models.ManyToManyField(Formateur, related_name='metiers')
+    departement = models.ForeignKey(Departement, on_delete=models.CASCADE, related_name='metiers')
 
     def __str__(self):
-        return f"{self.nom} ({self.categorie})"
+        return self.nom
 
 
-# Modèles de Réservation et de Planning #
-
-class Reservation(models.Model):
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    equipement = models.ForeignKey(Equipement, on_delete=models.CASCADE)
-    date_debut = models.DateTimeField()
-    date_fin = models.DateTimeField()
-    statut = models.CharField(max_length=20, choices=[('en_attente', 'En attente'), ('approuve', 'Approuvé'), ('refuse', 'Refusé')])
-
-    def __str__(self):
-        return f"Réservation {self.id} - {self.equipement} par {self.utilisateur}"
-
-
+# Modèle Planning
 class Planning(models.Model):
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    date_debut = models.DateField()
-    date_fin = models.DateField()
-    activites = models.ManyToManyField('Activite', through='Attribution')
-
-    def __str__(self):
-        return f"Planning de {self.utilisateur} du {self.date_debut} au {self.date_fin}"
-
-
-class Activite(models.Model):
-    nom = models.CharField(max_length=100)
-    description = models.TextField()
-    date = models.DateField()
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    dateDebut = models.DateField()
+    dateFin = models.DateField()
+    metier = models.ForeignKey(Metier, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nom
 
 
-class Attribution(models.Model):
-    planning = models.ForeignKey(Planning, on_delete=models.CASCADE)
-    activite = models.ForeignKey(Activite, on_delete=models.CASCADE)
-    responsable = models.ForeignKey(ResponsableMetier, on_delete=models.CASCADE)
+# Modèle Activité
+class Activite(models.Model):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    salle = models.CharField(max_length=255)
+    dateDebut = models.DateField()
+    planning = models.ForeignKey(Planning, on_delete=models.CASCADE, related_name="activites")
 
     def __str__(self):
-        return f"Attribution {self.activite} dans {self.planning}"
+        return self.nom
 
 
-class LigneAttribution(models.Model):
-    attribution = models.ForeignKey(Attribution, on_delete=models.CASCADE)
-    equipement = models.ForeignKey(Equipement, on_delete=models.CASCADE)
-    quantite = models.PositiveIntegerField()
+# Modèle Réservation
+class Reservation(models.Model):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    dateDebut = models.DateField()
+    dateFin = models.DateField()
+    activite = models.ForeignKey(Activite, on_delete=models.CASCADE, related_name="reservations")
 
     def __str__(self):
-        return f"{self.quantite} x {self.equipement} pour {self.attribution}"
+        return self.nom
 
 
-# Gestion des Stocks et Inventaire ###
+# Modèle Catégorie
+class Categorie(models.Model):
+    id = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=255)
+    description = models.TextField()
 
+    def __str__(self):
+        return self.nom
+
+# Modèle Article
+class Article(models.Model):
+    id = models.AutoField(primary_key=True)
+    categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    nom = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.nom
+
+
+# Modèle Inventaire
 class Inventaire(models.Model):
-    responsable = models.ForeignKey(Gestionnaire, on_delete=models.CASCADE)
-    date_mise_a_jour = models.DateTimeField(auto_now=True)
+    id = models.AutoField(primary_key=True)
+    libelle = models.CharField(max_length=255)
+    dateInventaire = models.DateField()
 
     def __str__(self):
-        return f"Inventaire mis à jour par {self.responsable} le {self.date_mise_a_jour}"
+        return self.libelle
 
 
+# Modèle LigneInventaire
 class LigneInventaire(models.Model):
     inventaire = models.ForeignKey(Inventaire, on_delete=models.CASCADE)
-    equipement = models.ForeignKey(Equipement, on_delete=models.CASCADE)
-    quantite_disponible = models.PositiveIntegerField()
-    seuil_alerte = models.PositiveIntegerField(default=1)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    quantite = models.IntegerField()
 
     def __str__(self):
-        return f"{self.quantite_disponible} x {self.equipement} dans l'inventaire"
+        return f"{self.quantite} x {self.article.nom} in {self.inventaire.libelle}"
 
 
-# Notifications
-
-class Notification(models.Model):
-    destinataire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    message = models.TextField()
-    date_envoye = models.DateTimeField(auto_now_add=True)
-    lu = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Notification pour {self.destinataire} - {'Lu' if self.lu else 'Non lu'}"
-
-
-# Comptes et Authentification
-
-class Compte(models.Model):
-    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE)
-    date_creation = models.DateTimeField(auto_now_add=True)
+# Modèle LigneReservation
+class LigneReservation(models.Model):
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    quantiteDemande = models.IntegerField()
+    quantiteValider = models.IntegerField()
 
     def __str__(self):
-        return f"Compte de {self.utilisateur}"
+        return f"{self.quantiteDemande} of {self.article.nom} for {self.reservation.nom}"
+
+
+# Modèle Attribution
+class Attribution(models.Model):
+    id = models.AutoField(primary_key=True)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Attribution of {self.article.nom} for {self.reservation.nom}"
+
+
+# Modèle LigneAttribution
+class LigneAttribution(models.Model):
+    attribution = models.ForeignKey(Attribution, on_delete=models.CASCADE)
+    quantite = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.quantite} of {self.attribution.article.nom} in attribution"
