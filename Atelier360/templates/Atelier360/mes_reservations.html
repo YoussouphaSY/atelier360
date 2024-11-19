@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atelier 360 - Mes Réservations</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div>
+            <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150" />
+        </div>
+        <nav>
+            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active underline{% endif %}">
+                <i class="fas fa-home"></i> Accueil
+            </a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'activities' %}active underline{% endif %}">
+                <i class="fas fa-tasks"></i> Planning
+            </a>
+            <a href="{% url 'mes_reservations' %}" class="{% if request.resolver_match.url_name == 'mes_reservations' %}active underline{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Mes Réservations
+            </a>
+            <a href="{% url 'profil' %}" class="{% if request.resolver_match.url_name == 'profil' %}active underline{% endif %}">
+                <i class="fas fa-user"></i> {{ request.user.first_name }} {{ request.user.last_name }} Profil
+            </a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'logout' %}active underline{% endif %}">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+            <a href="#" class="notification-link">
+                <i class="fas fa-bell"></i>
+                <span id="notification-badge" class="badge">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="container-body">
+        <h2>Mes Réservations</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Activité</th>
+                    <th>Sale</th>
+                    <th>Article</th>
+                    <th>Quantité Demandée</th>
+                    <th>Date de réservation</th>
+                </tr>
+            </thead>
+            <tbody id="reservation-tbody">
+                <!-- Les lignes de réservation seront injectées ici via JS -->
+            </tbody>
+        </table>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Atelier 360</h3>
+                <p>Plateforme de gestion</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p><i class="fas fa-envelope"></i> support@atelier360.fr</p>
+                <p><i class="fas fa-phone"></i> 01 23 45 67 89</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} Atelier 360 - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script>
+// Appeler l'API pour récupérer les lignes de réservation de l'utilisateur connecté
+fetch('/api/mes_reservations/')
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.getElementById('reservation-tbody');
+        
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">Aucune réservation trouvée.</td></tr>';
+        } else {
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.reservation.activite.nom}</td>
+                    <td>${item.reservation.activite.salle}</td>
+                    <td>${item.article.nom}</td>
+                    <td>${item.quantiteDemande}</td>
+                    <td>${item.reservation.dateDebut}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors de la récupération des données', error);
+    });
+
+    </script>
+
+    <script src="{% static 'js/reservation.js' %}"></script>
+</body>
+</html>

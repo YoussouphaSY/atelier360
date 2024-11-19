@@ -1,0 +1,49 @@
+body {
+  color: white;
+  text-align: center;
+}
+.welcome-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #f8f8f8;
+    margin-bottom: 10px;
+  }
+  
+.subtitle {
+    color: #ffffff;
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  
+.profile-section {
+    width: 60%;
+    background-color: white;
+    padding: 20px 30px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .profile-section h2 {
+    color: #a53e3e;
+    font-size: 24px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 5px;
+  }
+  
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+.profile-info p {
+    font-size: 18px;
+    color: #000000;
+    line-height: 1.5;
+  }
+  
+.profile-info strong {
+    color: #000000;
+  }

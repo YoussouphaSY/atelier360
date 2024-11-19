@@ -2,94 +2,102 @@
 {% load static %}
 <html lang="fr">
 
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atelier 360 - Réservation</title>
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-  </head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Atelier 360 - Activités Disponibles</title>
+        <link rel="stylesheet" href="{% static 'css/home.css' %}">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    </head>
 
-  <body>
-    <header>
-      <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150"/>
-      <nav>
-        <a href="#">Acceuil</a>
-        <a href="#">Réservation</a>
-        <a href="#">Planning </a>
-        <a href="#">Équipements</a>
-        <a href="#">Contact</a>
-        <a href="#"><img src="{% static 'images/profil.png' %}" class="profil" alt="profil" width="30"/></a>
-      </nav>
-    </header>
+    <body>
+        <header>
+            <div>
+                <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150" />
+            </div>
+            <nav>
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active underline{% endif %}">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="#" class="{% if request.resolver_match.url_name == 'activities' %}active underline{% endif %}">
+                    <i class="fas fa-tasks"></i> Planning
+                </a>
+                <a href="{% url 'mes_reservations' %}" class="{% if request.resolver_match.url_name == 'mes_reservations' %}active underline{% endif %}">
+                    <i class="fas fa-calendar-alt"></i> Mes Réservations
+                </a>
+                <a href="{% url 'profil' %}" class="{% if request.resolver_match.url_name == 'profil' %}active underline{% endif %}">
+                    <i class="fas fa-user"></i> {{ request.user.first_name }} {{ request.user.last_name }} Profil
+                </a>
+                <a href="{% url 'deconnexion' %}"  class="{% if request.resolver_match.url_name == 'logout' %}active underline{% endif %}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+                <a href="#" class="notification-link">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="badge">0</span>
+                </a>
+            </nav>
+        </header>
+        
 
-    <div class="container-body">
-      <div class="welcome-title">Bienvenue sur Atelier 360</div>
-      <div class="subtitle">
-        Sur cette page, vous pouvez directement réserver les équipements nécessaires pour vos travaux pratiques en quelques clics.
-        <br /><br />
-        Remplissez le formulaire ci-dessous pour planifier l'utilisation des outils disponibles dans l'atelier.
-      </div>
+        <main class="container-body">
+            <div class="page-header">
+                <h1><i class="fas fa-calendar-check"></i> Activités Disponibles</h1>
+                <p class="description">Explorez les activités et réservez vos équipements.</p>
+            </div>
 
-      <div class="container">
-        <h2>Formulaire de Réservation</h2>
-        <div class="block-container">
-          <div class="container-form">
-            <form id="reservation-form">
-                {% csrf_token %}
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group">
-                        <label for="equipment">Équipement à réserver :</label>
-                        <select id="equipment" name="equipment" required>
-                            <option value="">Sélectionnez un équipement</option>
-                            <option value="outil1">Outil 1</option>
-                            <option value="outil2">Outil 2</option>
-                            <option value="outil3">Outil 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="time">Heure de réservation :</label>
-                        <input type="time" id="time" name="time" required />
-                    </div>
+            <div class="activity-list">
+                {% if activities %}
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Activité</th>
+                            <th>Sale</th>
+                            <th>Métier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                        <tr>
+                            <td>{{ activity.nom }}</td>
+                            <td>{{ activity.salle }}</td>
+                            <td>{{ activity.planning.metier.nom }}</td>
+                            <td>
+                                <button class="btn btn-primary" id="reserve-btn-{{ activity.id }}" onclick="reserveActivity({{ activity.id }})">
+                                    <i class="fas fa-plus"></i> Réserver
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>Aucune activité disponible pour le moment.</p>
+                {% endif %}
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Atelier 360</h3>
+                    <p>Plateforme de gestion</p>
                 </div>
-                <div style="display: flex; gap: 70px;">
-                    <div class="form-group">
-                        <label for="date">Date de réservation :</label>
-                        <input type="date" id="date" name="date" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="reason">Motif de la réservation :</label>
-                        <input type="text" id="reason" name="reason" placeholder="Entrez votre motif" required />
-                    </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> support@atelier360.fr</p>
+                    <p><i class="fas fa-phone"></i> 01 23 45 67 89</p>
                 </div>
-                <div class="button">
-                    <button type="button" class="btn-text" onclick="addReservation()">Ajouter la réservation</button>
-                </div>
-            </form>
-        </div>        
-        <div class="container-list">
-          <div class="equipment-list">
-              <h3>Liste des Équipements Réservés</h3>
-              <hr />
-              <table>
-                  <thead>
-                      <tr>
-                          <th>Équipement</th>
-                          <th>Date</th>
-                          <th>Heure</th>
-                          <th>Motif</th>
-                      </tr>
-                  </thead>
-                  <tbody id="equipment-list-body">
-                      <!-- Les équipements ajoutés apparaîtront ici -->
-                  </tbody>
-              </table>
-          </div>
-        </div>
-    </div> 
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} Atelier 360 - Tous droits réservés</p>
+            </div>
+        </footer>
 
-    <script src="{% static 'js/home.js' %}"></script>
-    
-  </body>
 
+        <script src="{% static 'js/home.js' %}"></script>
+
+    </body>
 </html>

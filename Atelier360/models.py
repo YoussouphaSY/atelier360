@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, User
+from django.conf import settings
 
 
 # Modèle Utilisateur avec les rôles définis
@@ -22,7 +23,7 @@ class Utilisateur(AbstractUser):
 
     groups = models.ManyToManyField(Group, related_name="utilisateur_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="utilisateur_permissions")
-
+    
     def __str__(self):
         return f"{self.username} - {self.get_role_display()}"
 
@@ -38,7 +39,7 @@ class Formateur(models.Model):
 
 # Modèle Responsable Métier
 class ResponsableMetier(models.Model):
-    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)  # Mettez à jour cette ligne
     dateDebut = models.DateField()
     dateFin = models.DateField()
 
@@ -105,9 +106,11 @@ class Activite(models.Model):
 class Reservation(models.Model):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255)
-    dateDebut = models.DateField()
-    dateFin = models.DateField()
+    dateDebut = models.DateField(auto_now_add=True)
     activite = models.ForeignKey(Activite, on_delete=models.CASCADE, related_name="reservations")
+    
+    # utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="reservations")
+    # status = models.CharField(max_length=20, choices=[('confirmée', 'Confirmée'), ('en attente', 'En attente')], default='en attente')
 
     def __str__(self):
         return self.nom
@@ -121,6 +124,7 @@ class Categorie(models.Model):
 
     def __str__(self):
         return self.nom
+
 
 # Modèle Article
 class Article(models.Model):
@@ -159,9 +163,13 @@ class LigneReservation(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     quantiteDemande = models.IntegerField()
     quantiteValider = models.IntegerField()
+    dateDebut = models.DateField()
+    dateFin = models.DateField()
+    # Pour les commentaires de validation
+    commentaire = models.TextField(null=True, blank=True) 
 
     def __str__(self):
-        return f"{self.quantiteDemande} of {self.article.nom} for {self.reservation.nom}"
+        return f"{self.quantiteDemande} x {self.article.nom} pour {self.reservation.nom}"
 
 
 # Modèle Attribution
@@ -181,3 +189,18 @@ class LigneAttribution(models.Model):
 
     def __str__(self):
         return f"{self.quantite} of {self.attribution.article.nom} in attribution"
+
+
+# Modèle Notification pour tous les utilisateurs
+class Notification(models.Model):
+    """
+    Modèle pour gérer les notifications des utilisateurs.
+    """
+    destinataire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()  # Contenu de la notification
+    date_envoi = models.DateTimeField(auto_now_add=True)  # Date et heure d'envoi
+    lu = models.BooleanField(default=False)  # Statut de lecture de la notification
+
+    def __str__(self):
+        return f"Notification pour {self.destinataire.username}: {self.message[:30]}"
+

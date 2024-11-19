@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+{% load static %}
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
+        <title>Accès Refusé</title>
+        <link rel="stylesheet" href="{% static 'css/acces_refuse.css' %}">
     </head>
     <body>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugiat, rerum?</p>
-        
+
+    <div class="container">
+        <h1>Accès Refusé</h1>
+        <p>Vous n'avez pas la permission d'accéder à cette page avec votre rôle actuel.</p>
+        <p>Veuillez contacter un administrateur si vous pensez que cela est une erreur.</p>
+        <div class="button">
+            <a href="{% url 'login' %}">Retour</a>
+        </div>
+    </div>
+
     </body>
 </html>
