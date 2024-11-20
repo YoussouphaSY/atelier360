@@ -38,7 +38,7 @@ urlpatterns = [
     # API pour créer une nouvelle réservation
     path('api/reservations/', create_reservation, name='create_reservation'),
 
-    # Page permettant de faire une réservation (souvent avec un formulaire ou un système de sélection d'articles)
+    # Page permettant de faire une réservation (un système de sélection d'activite)
     path('reserver/', reserver, name='reserver'),
 
     # API pour récupérer les informations d'une activité spécifique

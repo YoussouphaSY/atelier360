@@ -131,6 +131,7 @@ class Article(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     nom = models.CharField(max_length=255)
     description = models.TextField()
+    # quantitedisponible = models.IntegerField()
 
     def __str__(self):
         return self.nom
