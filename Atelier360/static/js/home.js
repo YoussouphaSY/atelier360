@@ -89,7 +89,6 @@ function reserveActivity(activityId) {
                     const form = document.getElementById('reservation-form');
                     const formData = new FormData(form);
                     const selectedArticle = formData.get('articles');
-                    console.log("efjkjpgf")
                     console.log(selectedArticle)
                     const quantity = formData.get('quantity');
 

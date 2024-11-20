@@ -6,6 +6,7 @@ from .forms import LoginForm
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Reservation, Article, LigneReservation
+from .models import Activite, Article, Reservation, LigneReservation
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import json
@@ -129,18 +130,26 @@ def get_articles(request):
 def create_reservation(request):
     if request.method == 'POST':
         try:
+            # Charger les données JSON envoyées
             data = json.loads(request.body)
             print(data)
+
+            # Récupérer les données nécessaires
             activite_id = data.get('activite')
             article_id = data.get('articles')
             quantite = int(data.get('quantity'))
 
-            # Valider les données reçues
+            # Validation des données
             if not activite_id or not article_id or quantite <= 0:
                 return JsonResponse({'success': False, 'message': 'Données invalides.'})
 
+            # Récupérer l'activité et l'article
             activite = Activite.objects.get(id=activite_id)
             article = Article.objects.get(id=article_id)
+
+            # Vérifier la disponibilité de l'article
+            if article.quantitedisponible < quantite:
+                return JsonResponse({'success': False, 'message': 'Quantité demandée supérieure à la quantité disponible.'})
 
             # Créer une réservation
             reservation = Reservation.objects.create(
@@ -150,18 +159,27 @@ def create_reservation(request):
             )
 
             # Créer une ligne de réservation
-            LigneReservation.objects.create(
+            ligne_reservation = LigneReservation.objects.create(
                 reservation=reservation,
                 article=article,
                 quantiteDemande=quantite,
-                quantiteValider=0, 
+                quantiteValider=0,
                 dateDebut=now(),
                 dateFin=now()
             )
 
+            # Mise à jour de la quantité disponible de l'article
+            article.quantitedisponible -= quantite
+            article.save()
+
             return JsonResponse({'success': True, 'message': 'Réservation créée avec succès.'})
+        except Activite.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Activité non trouvée.'})
+        except Article.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Article non trouvé.'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
+
     return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'})
 
 

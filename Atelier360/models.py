@@ -108,9 +108,6 @@ class Reservation(models.Model):
     dateDebut = models.DateField(auto_now_add=True)
     activite = models.ForeignKey(Activite, on_delete=models.CASCADE, related_name="reservations")
     
-    # utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name="reservations")
-    # status = models.CharField(max_length=20, choices=[('confirmée', 'Confirmée'), ('en attente', 'En attente')], default='en attente')
-
     def __str__(self):
         return self.nom
 
@@ -131,7 +128,7 @@ class Article(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     nom = models.CharField(max_length=255)
     description = models.TextField()
-    # quantitedisponible = models.IntegerField()
+    quantitedisponible = models.IntegerField()
 
     def __str__(self):
         return self.nom
