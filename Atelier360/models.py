@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, User
-from django.conf import settings
 
 
 # Modèle Utilisateur avec les rôles définis

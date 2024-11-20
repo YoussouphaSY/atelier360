@@ -1,18 +1,16 @@
-from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from Atelier360.models import Activite, Article, LigneReservation, Reservation
 from .forms import LoginForm
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Formateur, Reservation, Article, LigneReservation, Notification
-from django.contrib.auth.models import User
-from django.utils import timezone
+from .models import Reservation, Article, LigneReservation
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import json
 from django.contrib.auth import logout
+
 
 
 # views pour gerer les connexions
@@ -116,84 +114,73 @@ def notifications(request):
 def get_articles(request):
     if request.method == 'GET':
         articles = Article.objects.all()
-        articles_data = [{'nom': article.nom, 'description': article.description} for article in articles]
+        articles_data = [{
+            'id': article.id,  # Ajoutez l'ID pour chaque article
+            'nom': article.nom,
+            'description': article.description
+        } for article in articles]
         return JsonResponse({'articles': articles_data}, safe=False)
-    else:
-        return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
 
-
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import Reservation, Activite, Article
-from .serializers import ReservationSerializer
-
-@api_view(['POST'])
-def create_reservation(request):
-    try:
-        activity_id = request.data.get('activity_id')
-        quantity = request.data.get('quantity')
-        articles = request.data.get('articles')
-        start_date = request.data.get('startDate')
-
-        # Vérification de la présence des champs nécessaires
-        if not all([activity_id, quantity, articles, start_date]):
-            return Response({'detail': 'Données manquantes'}, status=400)
-
-        try:
-            activity = Activite.objects.get(id=activity_id)
-        except Activite.DoesNotExist:
-            return Response({'detail': 'Activité non trouvée'}, status=400)
-
-        try:
-            article = Article.objects.get(id=articles)
-        except Article.DoesNotExist:
-            return Response({'detail': 'Article non trouvé'}, status=400)
-
-        # Création de la réservation
-        reservation = Reservation.objects.create(
-            activity=activity,
-            article=article,
-            quantity=quantity,
-            start_date=start_date
-        )
-
-        return Response({'success': True}, status=201)
-    except Exception as e:
-        return Response({'detail': str(e)}, status=400)
+    # Retourne une erreur plus explicite si la méthode est incorrecte
+    return JsonResponse({'error': 'Méthode HTTP invalide. Utilisez GET.'}, status=405)
 
 
 @csrf_exempt
-def add_reservation_detail(request):
+def create_reservation(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Exemple de données attendues
-            # {
-            #     "reservation_id": 1,
-            #     "article_id": 2,
-            #     "quantity": 5
-            # }
+            print(data)
+            activite_id = data.get('activite')
+            article_id = data.get('articles')
+            quantite = int(data.get('quantity'))
 
-            reservation_id = data.get('reservation_id')
-            article_id = data.get('article_id')
-            quantity = data.get('quantity')
+            # Valider les données reçues
+            if not activite_id or not article_id or quantite <= 0:
+                return JsonResponse({'success': False, 'message': 'Données invalides.'})
 
-            # Vérifiez si la réservation et l'article existent
-            reservation = get_object_or_404(Reservation, id=reservation_id)
-            article = get_object_or_404(Article, id=article_id)
+            activite = Activite.objects.get(id=activite_id)
+            article = Article.objects.get(id=article_id)
 
-            # Créez une ligne de réservation
-            ligne_reservation = LigneReservation.objects.create(
-                reservation=reservation,
-                article=article,
-                quantity=quantity
+            # Créer une réservation
+            reservation = Reservation.objects.create(
+                nom=f"Réservation pour {activite.nom}",
+                activite=activite,
+                dateDebut=now()
             )
 
-            return JsonResponse({"success": True, "line_id": ligne_reservation.id}, status=201)
+            # Créer une ligne de réservation
+            LigneReservation.objects.create(
+                reservation=reservation,
+                article=article,
+                quantiteDemande=quantite,
+                quantiteValider=0, 
+                dateDebut=now(),
+                dateFin=now()
+            )
+
+            return JsonResponse({'success': True, 'message': 'Réservation créée avec succès.'})
         except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=400)
-    else:
-        return JsonResponse({"error": "Invalid HTTP method"}, status=405)
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'})
+
+
+def reserver(request):
+    if request.method == 'POST':
+        # Obtenez l'activité associée (par exemple, depuis le formulaire ou une valeur par défaut)
+        activite_id = request.POST.get('activite_id')  # Récupérer l'ID de l'activité à réserver
+        activite = Activite.objects.get(id=activite_id)
+        
+        # Créez la réservation
+        reservation = Reservation.objects.create(
+            nom=f"Réservation pour {activite.nom}",  # Génère un nom basé sur l'activité
+            activite=activite
+        )
+        
+        # Renvoyer une réponse JSON ou rediriger selon votre besoin
+        return JsonResponse({'success': True, 'reservation_id': reservation.id})
+
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=400)
 
 
 def get_activity(request, activity_id):
