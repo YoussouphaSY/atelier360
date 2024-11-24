@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, User
 
+from Atelier360.utils import notifier_formateur
+
 
 # Modèle Utilisateur avec les rôles définis
 class Utilisateur(AbstractUser):
@@ -60,7 +62,7 @@ class ChefDepartement(models.Model):
 class Departement(models.Model):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255)
-    chef = models.OneToOneField(ChefDepartement, on_delete=models.SET_NULL, null=True, blank=True)
+    chefDepartement = models.OneToOneField(ChefDepartement, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.nom
@@ -80,7 +82,7 @@ class Metier(models.Model):
 # Modèle Planning
 class Planning(models.Model):
     id = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=255)
+    nom = models.CharField(max_length=255) 
     dateDebut = models.DateField()
     dateFin = models.DateField()
     metier = models.ForeignKey(Metier, on_delete=models.CASCADE)
@@ -93,7 +95,7 @@ class Planning(models.Model):
 class Activite(models.Model):
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255)
-    salle = models.CharField(max_length=255)
+    sale = models.CharField(max_length=255)
     dateDebut = models.DateField()
     planning = models.ForeignKey(Planning, on_delete=models.CASCADE, related_name="activites")
 
@@ -103,10 +105,18 @@ class Activite(models.Model):
 
 # Modèle Réservation
 class Reservation(models.Model):
+    
+    STATUTS = [
+        ('en_attente', 'En attente'),
+        ('valide', 'Validé'),
+        ('rejete', 'Rejeté'),
+    ]
+    
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255)
     dateDebut = models.DateField(auto_now_add=True)
     activite = models.ForeignKey(Activite, on_delete=models.CASCADE, related_name="reservations")
+    statut = models.CharField(max_length=20, choices=STATUTS, default='en_attente')
     
     def __str__(self):
         return self.nom
@@ -159,7 +169,6 @@ class LigneReservation(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     quantiteDemande = models.IntegerField()
-    quantiteValider = models.IntegerField()
     dateDebut = models.DateField()
     dateFin = models.DateField()
     # Pour les commentaires de validation
@@ -175,6 +184,14 @@ class Attribution(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Changer le statut de la réservation
+        self.reservation.statut = 'valide'
+        self.reservation.save()
+        # Notifier le formateur
+        notifier_formateur(self.reservation)
+
     def __str__(self):
         return f"Attribution of {self.article.nom} for {self.reservation.nom}"
 
@@ -182,10 +199,10 @@ class Attribution(models.Model):
 # Modèle LigneAttribution
 class LigneAttribution(models.Model):
     attribution = models.ForeignKey(Attribution, on_delete=models.CASCADE)
-    quantite = models.IntegerField()
+    quantiteValider = models.IntegerField()
 
     def __str__(self):
-        return f"{self.quantite} of {self.attribution.article.nom} in attribution"
+        return f"{self.quantiteValider} of {self.attribution.article.nom} in attribution"
 
 
 # Modèle Notification pour tous les utilisateurs

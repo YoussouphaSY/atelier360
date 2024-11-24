@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -149,6 +150,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 JAZZMIN_SETTINGS = {
     "site_title": "Atelier 360",
     "site_brand": "Admin - Atelier 360",
@@ -158,7 +160,15 @@ JAZZMIN_SETTINGS = {
         {"app": "Atelier360"},
     ],
     "show_ui_builder": False,
-    "theme": "darkly"
+    "theme": "darkly",
+    "dashboard_widgets": [
+        {
+            "type": "text",
+            "title": "Nombre total d'outils",
+            "content": "outils disponibles.",
+            "icon": "fas fa-tools",
+        },
+    ]
 
 }
 

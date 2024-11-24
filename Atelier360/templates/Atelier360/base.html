@@ -38,49 +38,11 @@
                     <i class="fas fa-bell"></i>
                     <span id="notification-badge" class="badge">{{ notifications.count }}</span>
                 </a>
-                
             </nav>
         </header>
-        
 
-        <main class="container-body">
-            <div class="page-header">
-                <h1><i class="fas fa-calendar-check"></i> Activités Disponibles</h1>
-                <p class="description">Explorez les activités et réservez vos équipements.</p>
-            </div>
-
-            <div class="activity-list">
-                {% if activities %}
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>Activité</th>
-                            <th>Sale</th>
-                            <th>Métier</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activity in activities %}
-                        <tr>
-                            <td>{{ activity.nom }}</td>
-                            <td>{{ activity.sale }}</td>
-                            <td>{{ activity.planning.metier.nom }}</td>
-                            <td>{{ activity.dateDebut }}</td>
-                            <td>
-                                <button class="btn-vert btn-primary" id="reserve-btn-{{ activity.id }}" onclick="reserveActivity({{ activity.id }})">
-                                    <i class="fas fa-plus"></i> Réserver
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>Aucune activité disponible pour le moment.</p>
-                {% endif %}
-            </div>
-        </main>
+        {% block content %}
+        {% endblock  %}
 
         <footer>
             <div class="footer-content">
@@ -98,11 +60,10 @@
                 <p>&copy; {% now "Y" %} Atelier 360 - Tous droits réservés</p>
             </div>
         </footer>
-
-
+        
         <script src="{% static 'js/home.js' %}"></script>
-        <script src="{% static 'js/main.js' %}"></script>
-
+        <script src="{% static 'js/reservation.js' %}"></script>
+        <script src="{% static 'js/notifications.js' %}"></script>
     </body>
-    
+
 </html>

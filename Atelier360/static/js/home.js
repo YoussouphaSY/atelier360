@@ -89,6 +89,7 @@ function reserveActivity(activityId) {
                     const form = document.getElementById('reservation-form');
                     const formData = new FormData(form);
                     const selectedArticle = formData.get('articles');
+
                     console.log(selectedArticle)
                     const quantity = formData.get('quantity');
 
@@ -96,7 +97,7 @@ function reserveActivity(activityId) {
                         activity_id: activityId,
                         quantity: quantity,
                         articles: selectedArticle,
-                        startDate: new Date().toISOString().split('T')[0], // Date au format YYYY-MM-DD
+                        startDate: new Date().toISOString().split('T')[0], 
                     });
 
                     if (!selectedArticle || quantity <= 0) {
@@ -141,3 +142,6 @@ function reserveActivity(activityId) {
             Swal.fire('Erreur', 'Impossible de récupérer les informations.', 'error');
         });
 }
+
+
+

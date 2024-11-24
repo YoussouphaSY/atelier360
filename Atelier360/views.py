@@ -1,21 +1,27 @@
+# Importations nécessaires
 from django.contrib.auth import authenticate, login as auth_login
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from Atelier360.models import Activite, Article, LigneReservation, Reservation
 from .forms import LoginForm
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Reservation, Article, LigneReservation
-from .models import Activite, Article, Reservation, LigneReservation
+from .models import Notification, Reservation, Article, LigneReservation
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import json
 from django.contrib.auth import logout
-
+from django.db.models import Sum
 
 
 # views pour gerer les connexions
 def user_login(request):
+    
+    """
+    Gère la connexion des utilisateurs en fonction de leur rôle.
+    Redirige les utilisateurs vers des pages spécifiques selon leur rôle.
+    """
+
     if request.method == 'POST':
         form = LoginForm(data=request.POST)
         if form.is_valid():
@@ -26,15 +32,13 @@ def user_login(request):
             if user is not None:
                 auth_login(request, user)
                 if user.is_superuser:
-                    # Vérification si c'est un superutilisateur
-                    # redirection vers la page admin
-                    return redirect('admin:index')
-                elif user.role in ['formateur', 'metier', 'gestionnaire']:
-                    # redirection vers la page Accueil si ce n'est pas un superutilisateur
-                    return redirect('home')
+                    return redirect('admin:index')  # Redirection pour les superutilisateurs
+                elif user.role in ['metier', 'gestionnaire']:
+                    return redirect('admin:index')  # Redirection pour ces rôles vers l'admin
+                elif user.role == 'formateur':
+                    return redirect('home')  # Redirection pour les formateurs
                 else:
-                    # redirection vers la page erreur si rôle non identifié
-                    return redirect('page')
+                    return redirect('page')  # Page d'erreur pour les rôles inconnus
             else:
                 form.add_error(None, "Nom d'utilisateur ou mot de passe incorrect")
     else:
@@ -48,6 +52,12 @@ def user_login(request):
 @login_required
 @user_passes_test(lambda user: user.role in ['formateur', 'gestionnaire'], login_url='page')
 def home_view(request):
+
+    """
+    Affiche la page d'accueil pour les utilisateurs autorisés (formateurs ou gestionnaires).
+    Charge les activités liées à l'utilisateur connecté.
+    """
+
     # Récupération des activités avec leurs relations
     activities = Activite.objects.select_related(
         'planning',
@@ -59,7 +69,7 @@ def home_view(request):
         'activities': activities,
         'user': request.user
     }
-    
+
     return render(request, 'Atelier360/home.html', context)
 
 
@@ -85,8 +95,14 @@ def profile(request):
 
 @login_required
 def mes_reservations(request):
+    
+    """
+    Affiche les réservations de l'utilisateur connecté.
+    Si une activité est spécifiée via 'activite_id', filtre les réservations correspondantes.
+    """
+    
     # Récupérer le paramètre 'activite_id' de la requête GET
-    activite_id = request.GET.get('activite_id')  # Peut-être 'activite_id' dans l'URL, ou dans les paramètres de requête
+    activite_id = request.GET.get('activite_id')  
 
     if activite_id:
         # Filtrer les réservations en fonction de l'activité
@@ -113,6 +129,12 @@ def notifications(request):
 
 @csrf_exempt
 def get_articles(request):
+    
+    """
+    API pour récupérer la liste des articles disponibles.
+    Retourne les articles au format JSON.
+    """
+    
     if request.method == 'GET':
         articles = Article.objects.all()
         articles_data = [{
@@ -128,6 +150,12 @@ def get_articles(request):
 
 @csrf_exempt
 def create_reservation(request):
+
+    """
+    API pour créer une réservation.
+    Valide les données envoyées, vérifie la disponibilité et enregistre la réservation.
+    """
+ 
     if request.method == 'POST':
         try:
             # Charger les données JSON envoyées
@@ -147,9 +175,18 @@ def create_reservation(request):
             activite = Activite.objects.get(id=activite_id)
             article = Article.objects.get(id=article_id)
 
+            # Calculer la quantité déjà réservée
+            quantite_reservee = LigneReservation.objects.filter(article=article).aggregate(total=Sum('quantiteDemande'))['total'] or 0
+
+            # Calculer la quantité restante
+            quantite_restante = article.quantitedisponible - quantite_reservee
+
             # Vérifier la disponibilité de l'article
-            if article.quantitedisponible < quantite:
-                return JsonResponse({'success': False, 'message': 'Quantité demandée supérieure à la quantité disponible.'})
+            if quantite_restante < quantite:
+                return JsonResponse({
+                    'success': False, 
+                    'message': f"Quantité demandée pour l'article '{article.nom}' est supérieure à la quantité disponible. Quantité restante : {quantite_restante}"
+                })
 
             # Créer une réservation
             reservation = Reservation.objects.create(
@@ -163,16 +200,19 @@ def create_reservation(request):
                 reservation=reservation,
                 article=article,
                 quantiteDemande=quantite,
-                quantiteValider=0,
                 dateDebut=now(),
                 dateFin=now()
             )
 
-            # Mise à jour de la quantité disponible de l'article
-            article.quantitedisponible -= quantite
-            article.save()
+            # Créer une notification de succès pour l'utilisateur qui a fait la réservation
+            Notification.objects.create(
+                destinataire=request.user,
+                message=f"Votre réservation pour l'activité '{activite.nom}' a été effectuée avec succès.",
+                lu=False  # La notification est non lue
+            )
 
             return JsonResponse({'success': True, 'message': 'Réservation créée avec succès.'})
+        
         except Activite.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Activité non trouvée.'})
         except Article.DoesNotExist:
@@ -191,7 +231,7 @@ def reserver(request):
         
         # Créez la réservation
         reservation = Reservation.objects.create(
-            nom=f"Réservation pour {activite.nom}",  # Génère un nom basé sur l'activité
+            nom=f"Réservation pour {activite.nom}",
             activite=activite
         )
         
@@ -207,10 +247,9 @@ def get_activity(request, activity_id):
         return JsonResponse({
             'id': activity.id,
             'nom': activity.nom,  # Utiliser 'nom' ici, comme défini dans votre modèle
-            'salle': activity.salle,
-            'dateDebut': activity.dateDebut.isoformat(),  # Convertir la date en format ISO
-            # Vous pouvez également ajouter d'autres informations comme la salle ou le planning
-            'planning': activity.planning.id  # Exemple pour inclure l'ID du planning associé
+            'sale': activity.sale,
+            'dateDebut': activity.dateDebut.isoformat(), 
+            'planning': activity.planning.id 
         })
     except Activite.DoesNotExist:
         return JsonResponse({'error': 'Activity not found'}, status=404)
@@ -219,3 +258,114 @@ def get_activity(request, activity_id):
 def deconnexion(request):
     logout(request)  # Déconnecte l'utilisateur
     return redirect('login')
+
+
+def outils_count(request):
+    count = Article.objects.count()
+    return JsonResponse({"count": count})
+
+
+@csrf_exempt
+def modifier_ligne_reservation(request, ligne_reservation_id):
+    
+    """
+    API pour modifier une ligne de réservation.
+    Met à jour la quantité ou l'article associé.
+    """
+    
+    if request.method == 'POST':
+        try:
+            # Charger les données JSON envoyées
+            data = json.loads(request.body)
+            quantite = int(data.get('quantite')) 
+            article_id = data.get('articleId')
+
+            # Validation des données
+            if quantite <= 0 or not article_id:
+                return JsonResponse({'success': False, 'message': 'Données invalides.'}, status=400)
+
+            # Récupérer la ligne de réservation et l'article
+            ligne_reservation = LigneReservation.objects.get(id=ligne_reservation_id)
+            article = Article.objects.get(id=article_id)
+
+            # Mise à jour de la ligne de réservation
+            ligne_reservation.quantiteDemande = quantite
+            ligne_reservation.article = article
+            ligne_reservation.save()
+
+            return JsonResponse({'success': True, 'message': 'Ligne de réservation mise à jour.'})
+
+        except LigneReservation.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Ligne de réservation non trouvée.'}, status=404)
+        except Article.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Article non trouvé.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'}, status=405)
+
+
+@login_required
+def delete_ligne_reservation(request, ligne_reservation_id):
+    
+    """
+    Supprime une ligne de réservation en attente.
+    """
+    
+    ligne_reservation = get_object_or_404(LigneReservation, id=ligne_reservation_id, reservation__statut='en_attente') 
+
+    if request.method == 'DELETE':
+        ligne_reservation.delete()  # Supprimer la ligne de réservation
+        return JsonResponse({'success': True}, status=200)
+
+    return JsonResponse({'success': False, 'message': 'Méthode non autorisée'}, status=405)
+
+
+# Vue pour afficher les notifications
+def notification(request):
+    
+    """
+    Charge les notifications non lues de l'utilisateur connecté.
+    Affiche les notifications sur une page dédiée.
+    """
+    
+    # Récupérer toutes les notifications non lues de l'utilisateur connecté
+    notifications = Notification.objects.filter(destinataire=request.user, lu=False)
+    context = {
+        'notifications': notifications
+    }
+    return render(request, 'Atelier360/notifications.html', context)
+
+
+# Vue API pour récupérer les notifications en JSON (pour le badge)
+def get_notifications(request):
+
+    """
+    API pour récupérer les notifications non lues de l'utilisateur connecté.
+    """
+
+    notifications = Notification.objects.filter(destinataire=request.user, lu=False)
+    notifications_data = [{
+        'id': notification.id,
+        'message': notification.message,
+        'date': notification.date_envoi,
+        'lu': notification.lu
+    } for notification in notifications]
+
+    return JsonResponse({'notifications': notifications_data})
+
+
+# Vue pour marquer une notification comme lue
+def mark_notification_as_read(request, notification_id):
+
+    """
+    Marque une notification comme lue.
+    """
+
+    try:
+        notification = Notification.objects.get(id=notification_id, destinataire=request.user)
+        notification.lu = True
+        notification.save()
+        return JsonResponse({'success': True, 'message': 'Notification marquée comme lue.'})
+    except Notification.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Notification non trouvée.'})

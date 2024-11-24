@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Activite, Attribution, Categorie, Formateur,
-    Inventaire, LigneAttribution, LigneInventaire,
+    Inventaire, LigneAttribution, LigneInventaire, Notification,
     Planning, Reservation, ResponsableMetier, Utilisateur,
     Article, Departement, Metier, ChefDepartement, LigneReservation
 )
@@ -30,6 +30,24 @@ class UtilisateurAdmin(admin.ModelAdmin):
         if not change or 'password' in form.cleaned_data:
             obj.set_password(form.cleaned_data['password'])
         obj.save()
+        
+    def has_add_permission(self, request):
+        # Empêche les utilisateurs de type `metier` ou `gestionnaire` de créer des comptes
+        if request.user.role in ['metier', 'gestionnaire']:
+            return False
+        return super().has_add_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        # Empêche les modifications par ces utilisateurs
+        if request.user.role in ['metier', 'gestionnaire']:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        # Empêche la suppression par ces utilisateurs
+        if request.user.role in ['metier', 'gestionnaire']:
+            return False
+        return super().has_delete_permission(request, obj)
 
 
 class ResponsableMetierAdmin(admin.ModelAdmin):
@@ -37,7 +55,7 @@ class ResponsableMetierAdmin(admin.ModelAdmin):
 
 
 class ActiviteAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'dateDebut', 'salle')
+    list_display = ('nom', 'dateDebut', 'sale', 'planning')
     search_fields = ('nom', 'salle')
     ordering = ('dateDebut',)
 
@@ -59,3 +77,4 @@ admin.site.register(LigneInventaire)
 admin.site.register(LigneReservation)
 admin.site.register(Planning)
 admin.site.register(Reservation)
+admin.site.register(Notification)

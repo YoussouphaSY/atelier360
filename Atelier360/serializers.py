@@ -5,7 +5,7 @@ from .models import Categorie, Reservation, LigneReservation, Article, Activite
 class ActiviteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Activite
-        fields = ['id', 'nom', 'salle', 'dateDebut'] 
+        fields = ['id', 'nom', 'sale', 'dateDebut'] 
 
 
 
@@ -14,7 +14,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ['id', 'nom', 'dateDebut', 'activite']
+        fields = ['id', 'nom', 'dateDebut', 'activite', 'statut']
         
 
 class CategorieSerializer(serializers.ModelSerializer):
@@ -36,6 +36,6 @@ class LigneReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LigneReservation
-        fields = ['id', 'article', 'quantiteDemande', 'quantiteValider', 'dateDebut', 'dateFin', 'commentaire', 'reservation']
+        fields = ['id', 'article', 'quantiteDemande', 'dateDebut', 'dateFin', 'commentaire', 'reservation']
         
 

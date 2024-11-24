@@ -1,0 +1,62 @@
+.page-header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.page-header p.description {
+    color: #888;
+    font-size: 16px;
+}
+
+/* Liste des notifications */
+.notification-list {
+    margin-top: 30px;
+}
+
+.notification-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.notification-list li {
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s;
+}
+
+.notification-list li.unread {
+    background-color: #fef3c7; /* Couleur douce pour les notifications non lues */
+    font-weight: bold;
+}
+
+.notification-list li p {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.notification-list li small {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+    font-size: 14px;
+}
+
+.notification-list li:hover {
+    background-color: #e2e2e2;
+}
+
+
+.btn-notify {
+    background-color: #2aa334; 
+    color: white;
+    border: none;
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+}

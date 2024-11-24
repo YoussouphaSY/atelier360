@@ -1,0 +1,42 @@
+.badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: white;
+}
+.bg-warning {
+    background-color: #ffc107;
+}
+.bg-success {
+    background-color: #28a745;
+}
+.bg-danger {
+    background-color: #dc3545;
+}
+
+
+button {
+    
+}
+
+.button-rouge {
+    background-color: #9e1414;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+.button-modifier {
+    background-color: #2aa334;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
