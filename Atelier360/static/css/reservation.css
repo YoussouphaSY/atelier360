@@ -1,26 +1,26 @@
+/* Badge Styles */
 .badge {
     padding: 5px 10px;
     border-radius: 12px;
     font-size: 0.9rem;
     color: white;
 }
+
 .bg-warning {
     background-color: #ffc107;
 }
+
 .bg-success {
     background-color: #28a745;
 }
+
 .bg-danger {
     background-color: #dc3545;
 }
 
-
-button {
-    
-}
-
+/* Buttons */
 .button-rouge {
-    background-color: #9e1414;
+    background-color: #d82424;
     color: white;
     border: none;
     padding: 10px;
@@ -28,7 +28,11 @@ button {
     font-size: 1.3rem;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
+}
+
+.button-rouge:hover {
+    background-color: #9e1414;
+}
 
 .button-modifier {
     background-color: #2aa334;
@@ -39,4 +43,38 @@ button {
     font-size: 1.3rem;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
+}
+
+.button-modifier:hover {
+    background-color: #218838;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .button-rouge,
+    .button-modifier {
+        font-size: 1.1rem; /* Slightly smaller buttons for mobile */
+        padding: 8px 12px;
+    }
+
+    /* Adjust badge for smaller screens */
+    .badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further button size adjustments for small screens */
+    .button-rouge,
+    .button-modifier {
+        font-size: 1rem;
+        padding: 6px 10px;
+    }
+
+    /* Reduce padding and font size for badges on smaller screens */
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+}

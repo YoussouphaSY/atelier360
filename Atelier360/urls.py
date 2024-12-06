@@ -2,7 +2,7 @@ from django.urls import path
 
 # Importation des vues et des vues API
 from Atelier360.views_api import LigneReservationListCreateView
-from .views import create_reservation, deconnexion, delete_ligne_reservation, get_activity, get_articles, get_notifications, mark_notification_as_read, mes_reservations, modifier_ligne_reservation, notification, outils_count, planning, user_login, home_view, page_view, profil
+from .views import create_reservation, deconnexion, delete_ligne_reservation, get_activity, get_articles, get_notifications, get_planning_events, mark_notification_as_read, mes_reservations, modifier_ligne_reservation, notification, outils_count, user_login, home_view, page_view, profil
 
 urlpatterns = [
     # Page d'accueil pour l'utilisateur avec la vue de connexion
@@ -19,9 +19,6 @@ urlpatterns = [
 
     # Route pour se déconnecter de l'application
     path('deconnexion/', deconnexion, name='deconnexion'),
-
-    # Page pour afficher le planning des réservations (calendrier, etc.)
-    path('planning/', planning, name='planning'),
 
     # Page pour afficher les notifications
     path('notifications/', notification, name='notifications'),  # Page utilisateur
@@ -55,5 +52,7 @@ urlpatterns = [
 
     # API pour marquer notification comme lu
     path('api/mark_notification_as_read/<int:notification_id>/', mark_notification_as_read, name='mark-notification-as-read'),
+    
+    path('api/get_planning_events/', get_planning_events, name='planning'),
     
 ]

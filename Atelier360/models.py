@@ -1,11 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission, User
-
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from Atelier360.utils import notifier_formateur
 
 
 # Modèle Utilisateur avec les rôles définis
 class Utilisateur(AbstractUser):
+    
     ROLES = [
         ('admin', 'Administrateur'),
         ('metier', 'Responsable Métier'),
@@ -105,19 +105,19 @@ class Activite(models.Model):
 
 # Modèle Réservation
 class Reservation(models.Model):
-    
+
     STATUTS = [
-        ('en_attente', 'En attente'),
-        ('valide', 'Validé'),
-        ('rejete', 'Rejeté'),
+        ('En attente', 'En attente'),
+        ('Traité', 'Traité'),
+        ('Rejeté', 'Rejeté'),
     ]
-    
+
     id = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=255)
     dateDebut = models.DateField(auto_now_add=True)
     activite = models.ForeignKey(Activite, on_delete=models.CASCADE, related_name="reservations")
-    statut = models.CharField(max_length=20, choices=STATUTS, default='en_attente')
-    
+    statut = models.CharField(max_length=20, choices=STATUTS, default='En attente')
+
     def __str__(self):
         return self.nom
 
@@ -207,6 +207,7 @@ class LigneAttribution(models.Model):
 
 # Modèle Notification pour tous les utilisateurs
 class Notification(models.Model):
+
     """
     Modèle pour gérer les notifications des utilisateurs.
     """
@@ -217,4 +218,3 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification pour {self.destinataire.username}: {self.message[:30]}"
-

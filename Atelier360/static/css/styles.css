@@ -1,54 +1,52 @@
 /* Global */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #ffffff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
 }
 
 /* Header */
 header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0px 100px; 
-    background-color: white;
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    z-index: 10;
-    box-sizing: border-box;
-    gap: 180px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px 100px; 
+  background-color: white;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  z-index: 10;
+  box-sizing: border-box;
+  gap: 180px;
 }
-
-
 
 header nav {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap; 
-    gap: 30px;
-  }
-  
-header nav a {
-    color: black;
-    text-decoration: none;
-    margin-left: 15px;
-    font-weight: bold;
-    font-size: 0.9em;
-  }
-header nav a:hover {
-    color: #a53e3e;
-  }
-
-.container-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 180px 30px 30px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; 
+  gap: 30px;
 }
 
+header nav a {
+  color: black;
+  text-decoration: none;
+  margin-left: 15px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+header nav a:hover {
+  color: #a53e3e;
+}
+
+.container-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 180px 30px 30px;
+}
 
 header nav a.active {
   color: #a53e3e; 
@@ -56,9 +54,109 @@ header nav a.active {
   border-bottom: 2px solid #a53e3e;
 }
 
+h1 {
+  font-family: 'Allura', cursive;
+  font-size: 4rem;
+  font-weight: 400;
+  text-align: center;
+  background: linear-gradient(45deg, #a53e3e, #ffffff, #a53e3e);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  letter-spacing: 2px;
+  margin-top: 20px;
+  animation: gradientShift 3s infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+      background-position: 0% 50%;
+  }
+  100% {
+      background-position: 100% 50%;
+  }
+}
+
+/* Footer */
 footer {
   text-align: center;
   padding: 10px;
   background-color: #3c3c3c;
   color: white;
+}
+
+#calendar {
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Media Queries pour rendre la page responsive */
+
+/* Pour les petits écrans (tablettes, téléphones) */
+@media (max-width: 768px) {
+  header {
+      padding: 0px 20px;
+      gap: 50px;
+  }
+
+  h1 {
+      font-size: 2.5rem;
+      margin-top: 10px;
+  }
+
+  .container-body {
+      padding: 150px 20px 20px;
+  }
+
+  #calendar {
+      width: 100%;
+      padding: 10px;
+  }
+
+  header nav {
+      justify-content: center;
+      gap: 20px;
+  }
+
+  header nav a {
+      font-size: 1em;
+      margin-left: 10px;
+  }
+}
+
+/* Pour les très petits écrans (téléphones en mode portrait) */
+@media (max-width: 480px) {
+  header {
+      padding: 0px 10px;
+      gap: 30px;
+  }
+
+  h1 {
+      font-size: 1.8rem;
+      margin-top: 10px;
+  }
+
+  .container-body {
+      padding: 120px 10px 20px;
+  }
+
+  header nav {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  header nav a {
+      font-size: 0.9em;
+      margin: 10px 0;
+  }
+
+  #calendar {
+      width: 100%;
+      padding: 10px;
+  }
 }

@@ -5,6 +5,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{% static 'css/login.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
         <title>Atelier 360 - Connexion </title>
     </head>
     <body>
@@ -15,7 +19,9 @@
                 <img src="{% static 'images/logoisep.png' %}" class="logo-isep" alt="logo isep" width="250">
             </div>
 
-            <h1>Connexion</h1>
+            <h1>Atelier360</h1>
+
+            <h2>Connexion</h2>
             
             {% if messages %}
                 {% for message in messages %}

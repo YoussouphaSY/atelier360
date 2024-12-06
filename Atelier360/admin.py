@@ -60,11 +60,26 @@ class ActiviteAdmin(admin.ModelAdmin):
     ordering = ('dateDebut',)
 
 
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'dateDebut', 'activite', 'statut')
+    search_fields = ('nom', 'activite')
+
+
+class PlanningAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'dateDebut', 'dateFin', 'metier')
+    search_fields = ('nom', 'metier')
+
+
+class AttributionAdmin(admin.ModelAdmin):
+    list_display = ('reservation', 'article')
+    search_fields = ('reservation', 'article')
+
+
 # Enregistrement des modèles avec leur classe d'administration personnalisée
 admin.site.register(ResponsableMetier, ResponsableMetierAdmin)
 admin.site.register(Utilisateur, UtilisateurAdmin)
 admin.site.register(Activite, ActiviteAdmin)
-admin.site.register(Attribution)
+admin.site.register(Attribution, AttributionAdmin)
 admin.site.register(Categorie)
 admin.site.register(Departement)
 admin.site.register(Metier)
@@ -75,6 +90,6 @@ admin.site.register(Inventaire)
 admin.site.register(LigneAttribution)
 admin.site.register(LigneInventaire)
 admin.site.register(LigneReservation)
-admin.site.register(Planning)
-admin.site.register(Reservation)
+admin.site.register(Planning, PlanningAdmin)
+admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Notification)

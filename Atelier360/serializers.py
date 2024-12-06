@@ -28,6 +28,15 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ['id', 'nom', 'description', 'categorie']
+    
+        
+class AttributionSerializer(serializers.ModelSerializer):
+    activite = ActiviteSerializer()
+    article = ArticleSerializer()
+
+    class Meta:
+        model = Reservation
+        fields = ['id', 'article', 'activite']
         
 
 class LigneReservationSerializer(serializers.ModelSerializer):

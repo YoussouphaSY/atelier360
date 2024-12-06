@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Planning</title>
+
+        <link rel="stylesheet" href="{% static 'css/home.css' %}">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
+    </head>
+    <body>
+        <header>
+            <div>
+                <img src="{% static 'images/logoisep.png' %}" class="logo" alt="Logo ISEP" width="150" />
+            </div>
+            <nav>
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active underline{% endif %}">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="{% url 'planning' %}" class="{% if request.resolver_match.url_name == 'planning' %}active underline{% endif %}">
+                    <i class="fas fa-tasks"></i> Planning
+                </a>
+                <a href="{% url 'mes_reservations' %}" class="{% if request.resolver_match.url_name == 'mes_reservations' %}active underline{% endif %}">
+                    <i class="fas fa-calendar-alt"></i> Mes Réservations
+                </a>
+                <a href="{% url 'profil' %}" class="{% if request.resolver_match.url_name == 'profil' %}active underline{% endif %}">
+                    <i class="fas fa-user"></i> {{ request.user.first_name }} {{ request.user.last_name }} Profil
+                </a>
+                <a href="{% url 'deconnexion' %}"  class="{% if request.resolver_match.url_name == 'logout' %}active underline{% endif %}">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </a>
+                <a href="{% url 'notifications' %}" class="notification-link">
+                    <i class="fas fa-bell"></i>
+                    <span id="notification-badge" class="badge">{{ notifications.count }}</span>
+                </a>
+                
+            </nav>
+        </header>
+
+        <main class="container-body">
+            <h1>Atelier360</h1>
+
+            <h2>Planning des Activités</h2>
+            <!-- Conteneur du calendrier -->
+            <div id="calendar"></div>
+            
+            <!-- Tableau pour afficher les événements -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nom du Planning</th>
+                        <th>Activité</th>
+                        <th>Salle</th>
+                        <th>Date</th>
+                        <th>Métier - Département</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tbody>
+                        {% for planning in plannings %}
+                            {% for activite in planning.activites %}
+                                <tr>
+                                    <td>{{ planning.nom }}</td>
+                                    <td>{{ activite.nom }}</td>
+                                    <td>{{ activite.sale }}</td>
+                                    <td>{{ activite.dateDebut }}</td>
+                                    <td>{{ planning.metier }} - {{ planning.departement }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+            </table>
+
+
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Atelier 360</h3>
+                    <p>Plateforme de gestion</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> support@atelier360.fr</p>
+                    <p><i class="fas fa-phone"></i> 01 23 45 67 89</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} Atelier 360 - Tous droits réservés</p>
+            </div>
+        </footer>
+
+        <!-- Inclusion du JS -->
+        <script src="{% static 'js/home.js' %}"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+    </body>
+</html>

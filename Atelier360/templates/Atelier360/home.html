@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
     </head>
 
@@ -22,7 +23,7 @@
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active underline{% endif %}">
                     <i class="fas fa-home"></i> Accueil
                 </a>
-                <a href="#" class="{% if request.resolver_match.url_name == 'activities' %}active underline{% endif %}">
+                <a href="{% url 'planning' %}" class="{% if request.resolver_match.url_name == 'planning' %}active underline{% endif %}">
                     <i class="fas fa-tasks"></i> Planning
                 </a>
                 <a href="{% url 'mes_reservations' %}" class="{% if request.resolver_match.url_name == 'mes_reservations' %}active underline{% endif %}">
@@ -34,7 +35,7 @@
                 <a href="{% url 'deconnexion' %}"  class="{% if request.resolver_match.url_name == 'logout' %}active underline{% endif %}">
                     <i class="fas fa-sign-out-alt"></i> Déconnexion
                 </a>
-                <a href="{% url 'notifications' %}" class="notification-link">
+                <a href="{% url 'notifications' %}" class="notification-link {% if request.resolver_match.url_name == 'notifications' %}active underline{% endif %}">
                     <i class="fas fa-bell"></i>
                     <span id="notification-badge" class="badge">{{ notifications.count }}</span>
                 </a>
@@ -44,8 +45,9 @@
         
 
         <main class="container-body">
+            <h1>Atelier360</h1>
             <div class="page-header">
-                <h1><i class="fas fa-calendar-check"></i> Activités Disponibles</h1>
+                <h2><i class="fas fa-calendar-check"></i> Activités Disponibles</h2>
                 <p class="description">Explorez les activités et réservez vos équipements.</p>
             </div>
 

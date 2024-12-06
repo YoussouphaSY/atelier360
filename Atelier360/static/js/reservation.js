@@ -39,47 +39,55 @@ function getArticles() {
         });
 }
 
-// Récupérer les réservations et les afficher dans le tableau
 fetch('/api/mes_reservations/')
     .then(response => response.json())
     .then(data => {
+        console.log('Données récupérées:', data);  
+
         const tbody = document.getElementById('reservation-tbody');
-        if (data.length === 0) {
+        
+        // Vérifier si 'reservations' est bien un tableau
+        if (data && Array.isArray(data.reservations) && data.reservations.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7">Aucune réservation trouvée.</td></tr>';
-        } else {
-            data.forEach(item => {
+        } else if (data && Array.isArray(data.reservations)) {
+            data.reservations.forEach(item => {
                 const row = document.createElement('tr');
                 
                 // Ajoutez une condition pour afficher ou masquer les boutons selon le statut
                 let actionButtons = '';
-                if (item.reservation.statut === 'en_attente') {
+                if (item.statut === 'En attente') {
                     actionButtons = `
-                        <button class="btn btn-warning" onclick="editLigneReservation(${item.reservation.id}, ${item.quantiteDemande}, ${item.article.id})">Modifier</button>
-                        <button class="button-rouge btn-danger" onclick="deleteLigneReservation(${item.reservation.id})">Supprimer</button>
+                        <button class="button-modifier btn-warning" onclick="editLigneReservation(${item.id}, ${item.quantite_demande}, ${item.article_id})">Modifier</button>
+                        <button class="button-rouge" onclick="deleteLigneReservation(${item.id})">Supprimer</button>
                     `;
                 }
 
-                row.innerHTML = `
-                    <td>${item.reservation.activite.nom}</td>
-                    <td>${item.reservation.activite.sale}</td>
-                    <td>${item.article.nom}</td>
-                    <td>${item.quantiteDemande}</td>
-                    <td>${item.reservation.dateDebut}</td>
-                    <td>
-                        <span class="badge ${item.reservation.statut === 'en_attente' ? 'bg-warning' : item.reservation.statut === 'valide' ? 'bg-success' : 'bg-danger'}">
-                            ${item.reservation.statut}
-                        </span>
-                    </td>
-                    <td>${actionButtons}</td>
-                `;
-                tbody.appendChild(row);
+                // Insérer les lignes de réservation et les informations
+                item.lignes.forEach(ligne => {
+                    row.innerHTML = `
+                        <td>${item.activite_nom}</td>
+                        <td>${item.activite_sale}</td>
+                        <td>${ligne.article_nom}</td>
+                        <td>${ligne.quantite_demande}</td>
+                        <td>${ligne.quantite_validee}</td>  <!-- Affichage de la quantité validée -->
+                        <td>${item.date_debut}</td>
+                        <td>
+                            <span class="badge ${item.statut === 'En attente' ? 'bg-warning' : item.statut === 'valide' ? 'bg-success' : 'bg-danger'}">
+                                ${item.statut}
+                            </span>
+                        </td>
+                        <td>${actionButtons}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
             });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="7">Données non valides reçues de l\'API.</td></tr>';
         }
     })
     .catch(error => {
         console.error('Erreur lors de la récupération des données', error);
     });
-
 
 // Fonction pour éditer la ligne de réservation (modification de la quantité et de l'article)
 function editLigneReservation(ligneReservationId, currentQuantity, currentArticleId) {
@@ -177,7 +185,6 @@ function editLigneReservation(ligneReservationId, currentQuantity, currentArticl
 }
 
 
-
 // Fonction pour supprimer une ligne de réservation
 function deleteLigneReservation(reservationId) {
     Swal.fire({
@@ -211,20 +218,4 @@ function deleteLigneReservation(reservationId) {
             });
         }
     });
-}
-
-// Fonction pour obtenir le cookie CSRF (en cas de suppression via API)
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }

@@ -33,7 +33,7 @@ class LigneReservationListCreateView(APIView):
 
         serializer = LigneReservationSerializer(ligne_reservations, many=True)
         return Response(serializer.data)
-    
+
 
 # Vue pour récupérer la liste des articles
 class ArticleListAPIView(APIView):
@@ -68,6 +68,7 @@ class ReservationDetailView(APIView):
         reservation = get_object_or_404(Reservation, pk=pk, activite__created_by=request.user)
         serializer = ReservationSerializer(reservation)
         return Response(serializer.data)
+
 
 class LigneReservationListView(generics.ListCreateAPIView):
     queryset = LigneReservation.objects.all()

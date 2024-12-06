@@ -2,11 +2,10 @@
 from django.contrib.auth import authenticate, login as auth_login
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from Atelier360.models import Activite, Article, LigneReservation, Reservation
+from Atelier360.models import Activite, Article, Attribution, LigneAttribution, LigneReservation, Planning, Reservation, Notification
 from .forms import LoginForm
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Notification, Reservation, Article, LigneReservation
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import json
@@ -73,6 +72,8 @@ def home_view(request):
     return render(request, 'Atelier360/home.html', context)
 
 
+
+
 @login_required
 def page_view(request):
     return render(request, 'Atelier360/page.html')
@@ -95,31 +96,87 @@ def profile(request):
 
 @login_required
 def mes_reservations(request):
-    
     """
-    Affiche les réservations de l'utilisateur connecté.
-    Si une activité est spécifiée via 'activite_id', filtre les réservations correspondantes.
+    Affiche les réservations de l'utilisateur connecté avec leurs lignes associées.
+    La quantité validée est incluse pour chaque ligne.
     """
-    
     # Récupérer le paramètre 'activite_id' de la requête GET
-    activite_id = request.GET.get('activite_id')  
+    activite_id = request.GET.get('activite_id')
 
+    # Récupérer les réservations avec ou sans filtre par activité
     if activite_id:
-        # Filtrer les réservations en fonction de l'activité
-        reservations = Reservation.objects.filter(activite_id=activite_id).select_related('activite')
+        reservations = Reservation.objects.filter(
+            activite_id=activite_id
+        ).select_related('activite')
     else:
-        # Si aucun activite_id n'est passé, récupérer toutes les réservations
         reservations = Reservation.objects.all().select_related('activite')
 
+    # Préparer les données à envoyer au template
+    reservation_data = []
+    for reservation in reservations:
+        lignes = []
+        ligne_reservations = LigneReservation.objects.filter(reservation=reservation)
+        for ligne in ligne_reservations:
+            try:
+                ligne_attribution = LigneAttribution.objects.get(
+                    attribution__reservation=reservation,
+                    attribution__article=ligne.article
+                )
+                quantite_validee = ligne_attribution.quantiteValider
+            except LigneAttribution.DoesNotExist:
+                quantite_validee = 0  # Pas de quantité validée
+
+            lignes.append({
+                "id": ligne.id,
+                "article_nom": ligne.article.nom,
+                "quantite_demande": ligne.quantiteDemande,
+                "quantite_validee": quantite_validee,
+                "article_id": ligne.article.id,
+            })
+
+        reservation_data.append({
+            "activite_nom": reservation.activite.nom,
+            "activite_sale": reservation.activite.sale,
+            "date_debut": reservation.dateDebut,
+            "statut": reservation.statut,
+            "lignes": lignes,
+        })
+
+    # Passer les données au template
     context = {
-        'reservations': reservations
+        "reservations": reservation_data,
     }
-    return render(request, 'Atelier360/mes_reservations.html', context)
+    return render(request, "Atelier360/mes_reservations.html", context)
+
 
 
 @login_required
-def planning(request):
-    return render(request, 'Atelier360/planning.html')
+def get_planning_events(request):
+    """
+    Vue pour afficher le planning dans un template HTML.
+    """
+    plannings = Planning.objects.prefetch_related(
+        'activites', 
+        'metier', 
+        'metier__departement'
+    )
+
+    # Préparer les données pour le template
+    events = []
+    for planning in plannings:
+        events.append({
+            'id': planning.id,
+            'nom': planning.nom,
+            'dateDebut': planning.dateDebut,
+            'dateFin': planning.dateFin,
+            'metier': planning.metier.nom,
+            'departement': planning.metier.departement.nom,
+            'activites': planning.activites.all(),  # On peut passer les objets directement
+        })
+
+    # Envoyer les données au template
+    return render(request, 'Atelier360/planning.html', {'plannings': events})
+
 
 
 @login_required
@@ -160,7 +217,7 @@ def create_reservation(request):
         try:
             # Charger les données JSON envoyées
             data = json.loads(request.body)
-            print(data)
+            # print(data)
 
             # Récupérer les données nécessaires
             activite_id = data.get('activite')
@@ -208,7 +265,7 @@ def create_reservation(request):
             Notification.objects.create(
                 destinataire=request.user,
                 message=f"Votre réservation pour l'activité '{activite.nom}' a été effectuée avec succès.",
-                lu=False  # La notification est non lue
+                lu=False 
             )
 
             return JsonResponse({'success': True, 'message': 'Réservation créée avec succès.'})
@@ -222,23 +279,6 @@ def create_reservation(request):
 
     return JsonResponse({'success': False, 'message': 'Méthode non autorisée.'})
 
-
-def reserver(request):
-    if request.method == 'POST':
-        # Obtenez l'activité associée (par exemple, depuis le formulaire ou une valeur par défaut)
-        activite_id = request.POST.get('activite_id')  # Récupérer l'ID de l'activité à réserver
-        activite = Activite.objects.get(id=activite_id)
-        
-        # Créez la réservation
-        reservation = Reservation.objects.create(
-            nom=f"Réservation pour {activite.nom}",
-            activite=activite
-        )
-        
-        # Renvoyer une réponse JSON ou rediriger selon votre besoin
-        return JsonResponse({'success': True, 'reservation_id': reservation.id})
-
-    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=400)
 
 
 def get_activity(request, activity_id):
@@ -312,7 +352,7 @@ def delete_ligne_reservation(request, ligne_reservation_id):
     Supprime une ligne de réservation en attente.
     """
     
-    ligne_reservation = get_object_or_404(LigneReservation, id=ligne_reservation_id, reservation__statut='en_attente') 
+    ligne_reservation = get_object_or_404(LigneReservation, id=ligne_reservation_id, reservation__statut='En attente') 
 
     if request.method == 'DELETE':
         ligne_reservation.delete()  # Supprimer la ligne de réservation
@@ -369,3 +409,4 @@ def mark_notification_as_read(request, notification_id):
         return JsonResponse({'success': True, 'message': 'Notification marquée comme lue.'})
     except Notification.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Notification non trouvée.'})
+    
